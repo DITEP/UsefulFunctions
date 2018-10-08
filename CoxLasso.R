@@ -24,4 +24,8 @@ coefficients[active_coefficients,]
 x_selected <- M[,active_coefficients]
 summary(coxph(Surv(Y$Surv[,1],Y$Surv[,2])~x_selected[,1]))
 
+# compute preditions
+
+exp(M[Val,]%*%active_coefficients)
+
 #and do survival plots for eg
