@@ -20,12 +20,13 @@ coefficients <- coef(fit, s = cv.fit$lambda.min)
 active_coefficients <- coefficients[,1] != 0
 coefficients[active_coefficients,]
 
-# compute stats
-x_selected <- M[,active_coefficients]
-summary(coxph(Surv(Y$Surv[,1],Y$Surv[,2])~x_selected[,1]))
+# compute preditions on the test cohort # dimensions and zeros coeff to check
+pred<-exp(M[Val,]%*%as.matrix(coefficients))
 
-# compute preditions
+# compute statistics: Concordance index
+library(survcomp)
+concordance.index(x=pred, 
+                  surv.time=Y$Surv[Val,1], 
+                  surv.event=Y$Surv[Val,2], 
+                  method="noether")
 
-exp(M[Val,]%*%active_coefficients)
-
-#and do survival plots for eg
