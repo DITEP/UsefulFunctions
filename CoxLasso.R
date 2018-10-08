@@ -1,6 +1,7 @@
 # this script is an example of Cox model penalized with Lasso procedure 
 # M is your matrix of variables
 # Y is your table of survival data, same order as M rows
+#Train is your random selection of patients in the training cohort, usually 70%
 
 #the cross validation procedure alows you to determine the best value of lambda, the penalization parameter:
 cv.fit <- cv.glmnet(M[Train,],Surv(Y$Surv[Train,1],Y$Surv[Train,2]), family="cox", alpha=1)
