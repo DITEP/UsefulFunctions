@@ -2,7 +2,7 @@
 # example of a LSTM with attention mechanism, in R Keras.
 # exemple data from imdb, see desciption in keras book from Chollet et al
 # structure of the net influenced by Andrew Ng's tutorial from Bahdanau et al 2014 and Xu et al 2015 papers
-# done by Loic Verlingue, DITEP
+# Author: Loic Verlingue, published the september 26th 2018
 
 library(keras)
 
