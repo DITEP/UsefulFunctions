@@ -74,7 +74,7 @@ s_prev <- layer_input(shape = c(n_s))
 a<-layer_input(shape = c(Tx,2*n_a))
 
 ### compute attention step
-one_step_attention<-function(a, s_prev, Tx){
+one_step_attention<-function(a, s_prev, Tx, t){
   #Arguments:
   #  a -- hidden state output of the Bi-LSTM, numpy-array of shape (m, Tx, 2*n_a)
   #  s_prev -- previous hidden state of the (post-attention) LSTM, numpy-array of shape (m, n_s)
@@ -92,7 +92,7 @@ one_step_attention<-function(a, s_prev, Tx){
   energies = layer_dense(e, units = 1, activation = "relu")
  
   # compute the attention weights "alphas" 
-  alphas = layer_activation_softmax(energies, axis = 1, name='attention_weights') #
+  alphas = layer_activation_softmax(energies, axis = 1, name=paste('attention_weights_',t,sep="")) #
   
   # "alphas" and "a" to compute the context vector to be given to the next (post-attention) LSTM-cell
   context = layer_dot(list(alphas,a), axes = 1) 
@@ -120,20 +120,32 @@ model<-function(Tx, n_a, n_s, X_size, Y_size){
   # Define your pre-attention Bi-LSTM (return_sequences=True)
   a = bidirectional(object = X, layer = layer_lstm(units =  n_a, return_sequences=TRUE))
   
+  #loop over the defined outputs of post-attention LSTM
+  for(t in seq(Ty)){
+
   # Step 2: either iterate for Ty steps, or do the following when only 1 output
   # one step of the attention mechanism to get back the context vector
-  context = one_step_attention(a, s, Tx)
+  context = one_step_attention(a, s, Tx, t)
   
   # Apply the post-attention LSTM cell to the "context" vector
   conc_plus<-layer_concatenate(list(context ,layer_reshape(s, c(1,n_s))))
   
   c(s,Z, c) %<-% layer_lstm(object = conc_plus, units = n_s, return_state = TRUE) 
    
-  # The value of initial_state should be a tensor or list of tensors representing the initial state of the RNN layer
+    # Step 2.D: Append "s" to the "outConc" tensor
+    
+    if(t==1){
+      outConc=s
+    } else{
+      outConc<-layer_concatenate(list(outConc,s),axis = 1)
+     }
+    
+  } # end loop over Ty
   
-  # Apply Dense layer to the hidden state output of the post-attention LSTM
-  out <-  layer_dense(s, 1, activation="sigmoid")
-  
+   # Apply Dense layer to the hidden state output of the post-attention LSTM
+  #out <-  layer_dense(s, 1, activation="sigmoid")
+    out<-layer_dense(outConc,1,"sigmoid")
+
   # finally, create model instance taking three inputs and returning the outputs.
   
   model <- keras_model(inputs = c(X,s0,c0), outputs = out)
@@ -160,7 +172,7 @@ c0 = matrix(0,nrow = length(Xoh), ncol = n_s)
 # run the learning phase
 # epochs=1 for convenience, add more iteration for real learning, but can be long
 
-history <- model %>% fit(x = list(Xoh, s0, c0),y = Red_y_train, epochs=1, batch_size=10)
+history <- model %>% fit(x = list(Xoh, s0, c0),y = Red_y_train, epochs=3, batch_size=10)
 
 #visualization
 
