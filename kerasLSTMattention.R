@@ -118,7 +118,7 @@ model<-function(Tx, n_a, n_s, X_size, Y_size){
   # Initialize empty list of outputs
   
   # Define your pre-attention Bi-LSTM (return_sequences=True)
-  a = bidirectional(object = X, layer = layer_lstm(units =  n_a, return_sequences=TRUE))
+  a = bidirectional(object = X, layer = layer_lstm(units =  n_a, return_sequences=TRUE, dropout = 0.2))
   
   #loop over the defined outputs of post-attention LSTM
   for(t in seq(Ty)){
@@ -130,7 +130,7 @@ model<-function(Tx, n_a, n_s, X_size, Y_size){
   # Apply the post-attention LSTM cell to the "context" vector
   conc_plus<-layer_concatenate(list(context ,layer_reshape(s, c(1,n_s))))
   
-  c(s,Z, c) %<-% layer_lstm(object = conc_plus, units = n_s, return_state = TRUE) 
+  c(s,Z, c) %<-% layer_lstm(object = conc_plus, units = n_s, return_state = TRUE, dropout = 0.2) 
    
     # Step 2.D: Append "s" to the "outConc" tensor
     
