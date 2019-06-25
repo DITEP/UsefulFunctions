@@ -1,3 +1,4 @@
+#Author: Loic Verlingue
 # this script is an example of Cox model penalized with Lasso procedure 
 # M is your matrix of variables
 # Y is your table of survival data, same order as M rows
